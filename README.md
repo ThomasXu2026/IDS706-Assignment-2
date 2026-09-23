@@ -378,9 +378,8 @@ IDS706-Assignment-2/
 ├── .github/
 │   └── workflows/
 │       └── tests.yml
-├── images/
-│   ├── actions-success.png
-│   └── tests-passed.png
+├── actions-success.png
+├── tests-passed.png
 ├── tests/
 │   └── test_gold_analysis.py
 ├── gold_analysis.py
