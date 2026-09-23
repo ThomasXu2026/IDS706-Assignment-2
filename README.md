@@ -361,7 +361,7 @@ Local test result:
 
 The following screenshot shows the local pytest run with all tests passing:
 
-![Local pytest - 9 tests passed](tests_passed.png)
+![Local pytest - 9 tests passed](test_passed.png)
 
 #### GitHub Actions Results
 
