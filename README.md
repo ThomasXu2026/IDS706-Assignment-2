@@ -505,6 +505,18 @@ backtest_month_prediction()
 
 The original function names were retained as compatibility wrappers so the earlier project tests and interface continue to work.
 
+### Refactoring Evidence
+
+The following GitHub commit diffs show two meaningful refactoring changes.
+
+The first change replaces the year-specific `monthly_2025_summary()` call with the reusable `monthly_summary(df, year)` function:
+
+![Refactoring monthly summary](Refactor_diff1.png)
+
+The second change replaces the September-specific `predict_september()` call with the reusable `predict_month(monthly_data, target_month)` function:
+
+![Refactoring prediction function](Refactor_diff2.png)
+
 ### Code Formatting and Linting
 
 Python code is formatted with **Black** and checked with **flake8**.
