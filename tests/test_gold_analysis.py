@@ -1,18 +1,20 @@
-import matplotlib
-matplotlib.use("Agg")
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import pytest
 
 from gold_analysis import (
     load_data,
+    data_quality_summary,
     preprocess_data,
     filter_recent_data,
+    detect_return_outliers,
     yearly_summary,
-    plot_yearly_average,
+    monthly_summary,
     monthly_2025_summary,
+    plot_yearly_average,
+    predict_month,
     predict_september,
+    backtest_month_prediction,
     run_analysis,
 )
 
@@ -141,4 +143,107 @@ def test_full_pipeline():
     assert results["september_prediction"] == pytest.approx(
         328.83,
         abs=0.01,
+    )
+
+
+def test_data_quality_summary():
+    """Dataset should contain no missing values or duplicate rows."""
+    df = load_data()
+
+    quality = data_quality_summary(df)
+
+    assert quality["duplicate_rows"] == 0
+    assert all(count == 0 for count in quality["missing_values"].values())
+
+
+def test_return_outliers():
+    """IQR-based return detection should identify unusual GLD movements."""
+    df = preprocess_data(load_data())
+
+    outliers = detect_return_outliers(df)
+
+    assert isinstance(outliers, pd.DataFrame)
+    assert len(outliers) > 0
+    assert "GLD_Daily_Return" in outliers.columns
+
+    # The current dataset contains 96 unusual daily GLD returns.
+    assert len(outliers) == 96
+
+
+def test_monthly_summary_generalized():
+    """Monthly summary should work for years other than 2025."""
+    df = preprocess_data(load_data())
+
+    monthly_2024 = monthly_summary(
+        df,
+        2024,
+    )
+
+    assert len(monthly_2024) == 12
+    assert monthly_2024["Month"].tolist() == list(range(1, 13))
+
+
+def test_monthly_summary_missing_year():
+    """Requesting a year not present in the dataset should fail clearly."""
+    df = preprocess_data(load_data())
+
+    with pytest.raises(
+        ValueError,
+        match="No data available",
+    ):
+        monthly_summary(
+            df,
+            2030,
+        )
+
+
+def test_predict_month_invalid_month():
+    """Prediction should reject month numbers outside 1 through 12."""
+    df = preprocess_data(load_data())
+    monthly = monthly_summary(
+        df,
+        2025,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="between 1 and 12",
+    ):
+        predict_month(
+            monthly,
+            13,
+        )
+
+
+def test_december_2024_backtest():
+    """Historical backtest should reproduce the expected 2024 result."""
+    df = preprocess_data(load_data())
+
+    result = backtest_month_prediction(
+        df,
+        year=2024,
+        target_month=12,
+    )
+
+    assert result["year"] == 2024
+    assert result["target_month"] == 12
+
+    assert result["prediction"] == pytest.approx(
+        255.21,
+        abs=0.02,
+    )
+
+    assert result["actual"] == pytest.approx(
+        243.51,
+        abs=0.02,
+    )
+
+    assert result["absolute_error"] == pytest.approx(
+        11.70,
+        abs=0.02,
+    )
+
+    assert result["percentage_error"] == pytest.approx(
+        4.80,
+        abs=0.02,
     )
