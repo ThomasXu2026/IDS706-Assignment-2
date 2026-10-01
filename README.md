@@ -584,7 +584,7 @@ flake8 linting
         ↓
 pytest test suite
 ```
-
+The workflow uses a Python version matrix to verify the project on both Python 3.11 and Python 3.12.
 The workflow runs automatically on pushes to `main` and pull requests targeting `main`.
 
 The CI badge continues to show the latest workflow status:
