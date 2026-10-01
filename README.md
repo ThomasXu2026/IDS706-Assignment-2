@@ -590,3 +590,71 @@ The workflow runs automatically on pushes to `main` and pull requests targeting 
 The CI badge continues to show the latest workflow status:
 
 [![Tests](https://github.com/ThomasXu2026/IDS706-Assignment-2/actions/workflows/tests.yml/badge.svg)](https://github.com/ThomasXu2026/IDS706-Assignment-2/actions/workflows/tests.yml)
+
+---
+
+## Docker and Containerization
+
+To improve reproducibility, I containerized the project using Docker.
+
+The Docker image uses `python:3.12-slim`, installs the dependencies from `requirements.txt`, copies the project files into the container, and runs `gold_analysis.py`.
+
+### Build the Docker Image
+
+From the project root directory:
+
+```bash
+docker build -t gold-analysis .
+```
+
+The image built successfully:
+
+![Docker image build](Docker_build.png)
+
+### Run the Container
+
+Run the analysis inside the container with:
+
+```bash
+docker run --rm gold-analysis
+```
+
+The container successfully reproduced the complete analysis, including data-quality checks, outlier detection, yearly and monthly summaries, the September 2025 prediction, and the 2024 historical backtest.
+
+![Docker container run - part 1](Docker_run1.png)
+
+![Docker container run - part 2](Docker_run2.png)
+
+### Running Container
+
+I also practiced using `docker ps` by starting the container in detached mode:
+
+```bash
+docker run -d --name gold-analysis-demo gold-analysis sh -c "sleep 300"
+docker ps
+```
+
+The running container was successfully listed:
+
+![Running Docker container](Docker_ps.png)
+
+After testing, the temporary container can be removed with:
+
+```bash
+docker stop gold-analysis-demo
+docker rm gold-analysis-demo
+```
+
+### What I Learned
+
+Docker makes the analysis less dependent on the Python environment installed on a specific computer. By defining the runtime environment and dependencies in the `Dockerfile`, the same analysis can be reproduced in an isolated container on another machine.
+
+During this exercise, I practiced the basic Docker workflow with:
+
+```text
+docker pull
+docker build
+docker images
+docker run
+docker ps
+```
