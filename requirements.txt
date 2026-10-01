@@ -1,4 +1,7 @@
 pandas
+polars
 matplotlib
 scikit-learn
 pytest
+black
+flake8
