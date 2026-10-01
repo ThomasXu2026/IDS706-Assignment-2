@@ -670,3 +670,8 @@ docker images
 docker run
 docker ps
 ```
+### Final CI Result on Main
+
+After merging the improvement branch, the complete workflow also passed successfully on the final `main` branch.
+
+![Final CI result on main](Final_CI_main.png)
