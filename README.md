@@ -406,3 +406,187 @@ GitHub Repository:
 https://github.com/ThomasXu2026/IDS706-Assignment-2
 
 The repository includes the automated tests, GitHub Actions workflow, CI status badge, and screenshots demonstrating that the tests pass successfully.
+
+---
+
+## Project Refinement
+
+For this phase of the project, I improved the reliability, code quality, and analytical usefulness of the original gold-price analysis.
+
+The main improvements include:
+
+- Generalizing functions that were previously specific to 2025
+- Adding reusable data-quality checks
+- Adding outlier detection for unusual daily GLD returns
+- Adding a historical backtest to evaluate the prediction approach
+- Expanding the automated test suite from 9 to 15 tests
+- Adding Black formatting and flake8 linting
+- Adding code-quality checks to GitHub Actions
+
+### Real-World Problem
+
+The project examines historical GLD price behavior and uses recent monthly trends to make a simple short-term prediction.
+
+The original analysis produced a September 2025 prediction, but a future prediction alone does not show whether the modeling approach is reliable. To improve the analysis, I added a historical backtest using 2024 data so the model could be evaluated against a known result.
+
+---
+
+## Data Quality and Outlier Treatment
+
+The dataset was checked for missing values and duplicate observations.
+
+Results:
+
+```text
+Missing values: 0
+Duplicate rows: 0
+```
+
+A reusable `data_quality_summary()` function was added so these checks can be performed automatically and tested.
+
+### Outlier Detection
+
+Instead of detecting outliers directly from GLD price levels, I examined **daily percentage returns**.
+
+This choice was made because GLD prices show a long-term upward trend. Applying an outlier rule directly to the price level could incorrectly classify later high prices as unusual simply because the market increased over time.
+
+The IQR method identified:
+
+```text
+96 potential unusual daily GLD movements
+```
+
+These observations were **not automatically removed**.
+
+Large daily price movements may represent real market events rather than data-entry errors, so they were retained for the analysis.
+
+---
+
+## Refactoring and Code Quality
+
+Several functions were generalized to make the analysis easier to reuse.
+
+### Before
+
+The original project contained functions tied to one specific year or prediction:
+
+```python
+monthly_2025_summary(df)
+predict_september(monthly_2025)
+```
+
+### After
+
+The analysis now uses reusable functions:
+
+```python
+monthly_summary(df, year)
+predict_month(monthly_data, target_month)
+```
+
+For example:
+
+```python
+monthly_summary(df, 2024)
+monthly_summary(df, 2025)
+
+predict_month(monthly_2025, 9)
+```
+
+This reduces duplicated logic and allows the same workflow to be used for different years and target months.
+
+Additional reusable functions were added:
+
+```text
+data_quality_summary()
+detect_return_outliers()
+backtest_month_prediction()
+```
+
+The original function names were retained as compatibility wrappers so the earlier project tests and interface continue to work.
+
+### Code Formatting and Linting
+
+Python code is formatted with **Black** and checked with **flake8**.
+
+Local checks can be run with:
+
+```bash
+python -m black --check gold_analysis.py tests
+python -m flake8 --config=.flake8 gold_analysis.py tests
+python -m pytest -v
+```
+
+Current local results:
+
+```text
+Black: passed
+flake8: 0 errors
+pytest: 15 passed
+```
+
+---
+
+## Model Backtesting
+
+The original analysis predicted the September 2025 average GLD value using January through August 2025 data.
+
+To evaluate whether the same modeling approach can produce a reasonable historical prediction, I added a backtest using 2024 data.
+
+The model was trained using January through November 2024 monthly averages and used to predict December 2024.
+
+Results:
+
+```text
+Predicted December 2024 GLD: 255.21
+Actual December 2024 GLD:    243.51
+Absolute error:               11.70
+Percentage error:              4.80%
+```
+
+The backtest shows that the simple linear model produced a prediction within approximately **4.8%** of the actual December average.
+
+This does not prove that the model will always predict future prices accurately, but it provides a measurable historical evaluation instead of relying only on an unverified future prediction.
+
+---
+
+## Updated Automated Testing
+
+The automated test suite was expanded from **9 tests to 15 tests**.
+
+The new tests cover:
+
+- Data-quality summary
+- Daily-return outlier detection
+- Generalized monthly summaries
+- Missing-year edge case
+- Invalid target-month edge case
+- Historical backtesting
+
+The existing tests for data loading, preprocessing, filtering, aggregation, visualization, prediction, and the complete integration pipeline are still included.
+
+The full suite currently passes:
+
+```text
+15 passed
+```
+
+---
+
+## Updated Continuous Integration
+
+The GitHub Actions workflow now performs three automated quality checks:
+
+```text
+Black formatting check
+        ↓
+flake8 linting
+        ↓
+pytest test suite
+```
+
+The workflow runs automatically on pushes to `main` and pull requests targeting `main`.
+
+The CI badge continues to show the latest workflow status:
+
+[![Tests](https://github.com/ThomasXu2026/IDS706-Assignment-2/actions/workflows/tests.yml/badge.svg)](https://github.com/ThomasXu2026/IDS706-Assignment-2/actions/workflows/tests.yml)
